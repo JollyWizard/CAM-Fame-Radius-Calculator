@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> Test </title>
+
+<style>
+	body 
+	{
+		font-weight: bold;
+		background: darkgray;
+		color: white;
+		font-size: 2em;
+	}
+	
+	input
+	{
+		padding: .5em;
+		padding-right:2em;
+		text-align: right;
+		font-weight: bold;
+	}
+	
+	input[type="number"]
+	{
+		background:azure;
+		padding: .5em;
+		text-align: right;
+	}
+	
+	input[readonly]
+	{
+		background:azure;
+	}
+	
+	label
+	{
+		display: flex;
+		align-content:right;
+		flex-direction:row;
+
+		margin: .5em;
+	}
+	
+	label input
+	{
+		margin:.25em;
+		margin-left: 2em;
+		width: 16em;
+	}
+	
+	.inputs {
+		display: flex;
+		flex-flow: column;
+		border: thick black ridge;
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-evenly;
+	}
+	
+	.inputs::before
+	{
+		background: black;
+		display:block;
+		padding:.5em;
+		content: "Inputs";
+		flex-basis:100%;
+		align-self:left;
+	}
+	
+	.inputs, .outputs
+	{
+		border: thick solid black;
+		margin:1em;
+	}
+	
+	.outputs {		
+		display: flex;
+		flex-wrap: wrap;
+		flex-direction: row;
+		align-items: flex-start;
+		justify-content: flex-start;
+	}
+	
+	.outputs::before
+	{
+		background: black;
+		padding:.5em;
+		content: "Offset Coordinates";
+		flex-basis:100%;
+	}
+	
+	.outputs div
+	{
+		display:flex;
+		flex-wrap: wrap;
+		justify-content:center;
+	}
+</style>
+</head>
+
+<body>
+	<div class='inputs'>
+		<label>
+			X_Center
+			<input class="format-thousandths" name="X_CENTER" type="number" step="0.01"/></label>
+		<label>
+			Y_Center
+			<input class="format-thousandths" name="Y_CENTER" type='number' step="0.01"/>
+		</label>
+		<label>
+			Radius
+			<input class="format-thousandths" name="CON_RAD" type='number' step="0.01"/>
+		</label>
+	</div>
+	
+	<div class='outputs'>
+	<div>
+	<label>
+		UL
+		<input class="format-thousandths" name="UL" readonly />
+	</label>
+	<label>
+		UR
+		<input class="format-thousandths" name="UR" readonly />
+	</label>
+	</div>
+
+	<div>
+	<label>
+		DL
+		<input class="format-thousandths" name="DL" readonly />
+	</label>
+	<label>
+		DR
+		<input class="format-thousandths" name="DR" readonly />
+	</label>
+	</div>
+	</div>
+	
+<script>
+	let formatTargets = document.querySelectorAll(".format-thousandths")
+	
+	formatTargets.forEach(el => {
+		// Triggers when user finishes typing and when 
+		function onChange(ev)
+		{
+			//console.log('onChange', ev)
+			// Cache value
+			ev.target.dataset.val = ev.target.value
+			updateFormat(ev.target)
+			updateOutput()
+		}
+		
+		el.addEventListener('change', onChange)
+		
+		/* @todo Add Key listeners to work smart based on carat positin.*/
+		
+		/*This is the function that updates the format string from the data value.*/
+		function updateFormat(el)
+		{
+			let current = el.value
+			,	dataval = el.dataset.val
+			,	datastring = Number(dataval).toFixed(3)
+			//console.log('update', {current:current, dataval:dataval, datastring:datastring})
+			if (current != datastring)
+			{
+				el.value = datastring
+			}
+		}
+	})
+	
+	function updateOutput()
+	{
+		function fetchValue(name)
+		{
+			let element = document.querySelector(`[name=${name}]`)
+			return element.value
+		}
+		
+		let map = ["X_CENTER", "Y_CENTER", "CON_RAD"]
+		, values = map.map(fetchValue).map(parseFloat)
+		, isNum = values.map(isNumber)
+		console.log(values, isNum)
+		
+		function isNumber(element) {
+			return !isNaN(element)
+		}
+		
+		if ( values.every(isNumber) )
+		{
+			console.log("Ready")
+			
+			let x_center = values[0]
+			,	y_center = values[1]
+			,	con_rad = values[2]
+			
+			function point(positiveHorizontal, positiveVertical)
+			{
+				let x = x_center
+				,	y = y_center
+				,	x_add = con_rad
+				,	y_add = con_rad
+				
+				if (!positiveVertical) y_add *= -1
+				if (!positiveHorizontal) x_add *= -1
+				
+				let new_x = x_center + x_add
+				,	new_y = y_center + y_add
+				
+				
+				return {
+					x : new_x
+				,	y : new_y
+				}
+			}
+			
+			function roundOff(val) {return parseFloat(val).toFixed(3)}
+			let results =
+			{
+				Y_Up : roundOff(y_center + con_rad)
+			,	Y_Down : roundOff(y_center - con_rad)
+			,   X_Right : roundOff(x_center + con_rad)
+			,	X_Left : roundOff(x_center - con_rad)
+			}
+			
+			console.log(results)
+			
+			let {X_Left, Y_Up, X_Right, Y_Down}=results
+			
+			function template(x,y) {
+				return `X:=${x} \t Y:=${y}`
+			}
+			
+			setNameValue("UL", template(X_Left, Y_Up))
+			setNameValue("UR", template(X_Right, Y_Up))
+			setNameValue("DL", template(X_Left, Y_Down))
+			setNameValue("DR", template(X_Right, Y_Down))
+			
+			function setNameValue(name, value)
+			{
+				const el = document.querySelector(`[name=${name}]`)
+				el.value = value
+			}
+		}
+	}
+</script>
+</body>
+</html>
