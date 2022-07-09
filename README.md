@@ -17,4 +17,4 @@ Layout still needs to be figured out.
 
 Current status: First Draft.
 
-[Live Demot](https://jollywizard.github.io/CAM-Fame-Radius-Calculator/)
+[Live Demo](https://jollywizard.github.io/CAM-Fame-Radius-Calculator/)
