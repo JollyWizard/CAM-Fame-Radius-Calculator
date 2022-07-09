@@ -13,6 +13,6 @@ It is left to the user to read the orientation and choose the one they need.
 The advantage is that manual calculations are avoided, and derived immediately from inputs..
 
 The project was done in HTML5 without libraries. 
-I experimented with responsive layout, but it needs work to make it portable across screen sizes.
+Layout still needs to be figured out.
 
 Current status: First Draft.
